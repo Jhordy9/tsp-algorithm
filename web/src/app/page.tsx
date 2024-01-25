@@ -1,95 +1,90 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import { useState, useEffect, useCallback, ChangeEvent } from 'react';
+import { Input, VStack, Text } from '@chakra-ui/react';
+import { Header } from './components/Header';
+import { useDebounce } from './hooks/useDebounce';
+import useSWR from 'swr';
+import { fetcher } from './utils';
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+type ApiResponse = {
+  id: string;
+  email: string;
+  phone: string;
+  name: string;
+  xCoordinate: number;
+  yCoordinate: number;
+};
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+type FiltersType = {
+  name: string;
+  email: string;
+  phone: string;
+};
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+const ResultsList: React.FC = () => {
+  const [customers, setCustomers] = useState<ApiResponse[]>([]);
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+  const [keywordFilter, setFilters] = useState<string>('');
+  const debouncedValue = useDebounce<string>(keywordFilter, 1000);
+  const urlGetCustomers = `http://localhost:4000/customers?search=${debouncedValue}`;
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+  const { data: resultData, mutate } = useSWR<ApiResponse[]>(
+    urlGetCustomers,
+    fetcher,
+    {
+      refreshInterval: 5000,
+    }
   );
-}
+
+  useEffect(() => {
+    if (resultData) {
+      setCustomers(resultData);
+    }
+  }, [resultData]);
+
+  const handleFilterByKeyWord = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setFilters(e.currentTarget.value);
+      mutate();
+    },
+    [mutate]
+  );
+
+  return (
+    <>
+      <Header />
+      <VStack spacing={4} align='center' pt={4}>
+        <Input
+          placeholder='Procure por nome, email ou telefone'
+          value={keywordFilter}
+          onChange={handleFilterByKeyWord}
+          maxW='30%'
+          w='30%'
+        />
+        {customers.map((result, index) => (
+          <VStack
+            alignItems='flex-start'
+            key={index}
+            borderWidth='1px'
+            p={4}
+            spacing={2}
+            borderRadius='md'
+            w='40%'
+            maxW='100%'
+            h='180px'
+            maxH='100%'
+          >
+            <Text fontWeight='bold'>Nome: {result.name}</Text>
+            <Text>Telefone: {result.phone}</Text>
+            <Text>Email: {result.email}</Text>
+            <Text>
+              Coordenadas: ({result.xCoordinate}, {result.yCoordinate})
+            </Text>
+          </VStack>
+        ))}
+      </VStack>
+    </>
+  );
+};
+
+export default ResultsList;
