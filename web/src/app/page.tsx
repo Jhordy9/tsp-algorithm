@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { useDebounce } from './hooks/useDebounce';
 import useSWR from 'swr';
 import { fetcher } from './utils';
+import { CreateCustomerModal } from './components/CreateCustomerModal';
 
 type ApiResponse = {
   id: string;
@@ -55,6 +56,7 @@ const ResultsList: React.FC = () => {
           maxW='30%'
           w='30%'
         />
+        <CreateCustomerModal />
         {customers.map((result, index) => (
           <VStack
             alignItems='flex-start'
