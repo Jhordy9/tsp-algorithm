@@ -29,9 +29,11 @@ export const getCustomers = async (query: GetCustomersQuery) => {
     );
   }
 
-  return customers.rows.map((customer) => ({
-    ...customer,
-    xCoordinate: customer.x_coordinate,
-    yCoordinate: customer.y_coordinate,
-  }));
+  return parseResponse.data.map(
+    ({ x_coordinate, y_coordinate, ...restCustomer }) => ({
+      ...restCustomer,
+      xCoordinate: x_coordinate,
+      yCoordinate: y_coordinate,
+    }),
+  );
 };

@@ -31,6 +31,4 @@ export const GetCustomersQuerySchema = z.object({
 });
 export type GetCustomersQuery = z.infer<typeof GetCustomersQuerySchema>;
 
-export const GetCustomersResponseSchema = z.array(
-  CustomerResponseSchema.optional(),
-);
+export const GetCustomersResponseSchema = z.array(CustomerResponseSchema);
