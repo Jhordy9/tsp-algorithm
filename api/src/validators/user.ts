@@ -24,15 +24,10 @@ export const CustomerResponseSchema = z.object({
 ////////////////////////////////////////
 
 export const GetCustomersQuerySchema = z.object({
-  name: z
+  search: z
     .string()
     .transform((value) => value?.toLowerCase())
     .optional(),
-  email: z
-    .string()
-    .transform((value) => value?.toLowerCase())
-    .optional(),
-  phone: z.string().optional(),
 });
 export type GetCustomersQuery = z.infer<typeof GetCustomersQuerySchema>;
 

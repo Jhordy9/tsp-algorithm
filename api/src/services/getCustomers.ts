@@ -9,15 +9,13 @@ export const getCustomers = async (query: GetCustomersQuery) => {
   SELECT id, email, phone, name, x_coordinate, y_coordinate
   FROM "customer"
   WHERE 
-    LOWER(name) LIKE $1 AND
-    LOWER(email) LIKE $2 AND
-    phone LIKE $3;
+    LOWER(name) LIKE $1 OR
+    LOWER(email) LIKE $1 OR
+    phone LIKE $1;
 `;
 
   const customers = await dbPool.query(getCustomers, [
-    query.name ? `%${query.name}%` : '%',
-    query.email ? `%${query.email}%` : '%',
-    query.phone ? `%${query.phone}%` : '%',
+    query.search ? `%${query.search}%` : '%',
   ]);
 
   const parseResponse = GetCustomersResponseSchema.safeParse(customers.rows);
