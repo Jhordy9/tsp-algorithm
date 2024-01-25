@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: tsp-db
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tsp-db
+    ports:
+      - '5432:5432'
