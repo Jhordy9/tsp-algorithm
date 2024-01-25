@@ -7,11 +7,12 @@ import {
 export const getCustomers = async (query: GetCustomersQuery) => {
   const getCustomers = `
   SELECT id, email, phone, name, x_coordinate, y_coordinate
-  FROM "customer"
+  FROM "customer" as c
   WHERE 
-    LOWER(name) LIKE $1 OR
-    LOWER(email) LIKE $1 OR
-    phone LIKE $1;
+  LOWER(name) LIKE $1 OR
+  LOWER(email) LIKE $1 OR
+  phone LIKE $1
+  ORDER BY c.created_at DESC
 `;
 
   const customers = await dbPool.query(getCustomers, [
