@@ -15,12 +15,6 @@ type ApiResponse = {
   yCoordinate: number;
 };
 
-type FiltersType = {
-  name: string;
-  email: string;
-  phone: string;
-};
-
 const ResultsList: React.FC = () => {
   const [customers, setCustomers] = useState<ApiResponse[]>([]);
 
