@@ -14,22 +14,38 @@ import {
   InputGroup,
   useDisclosure,
   useToast,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import useSWRMutation from 'swr/mutation';
 import { sendRequest } from '../utils';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-type CreateCustomerFormData = {
-  name: string;
-  phone: string;
-  email: string;
-  xCoordinate: number;
-  yCoordinate: number;
-};
+const schema = z.object({
+  name: z.string().min(1, { message: 'Nome é obrigatório' }),
+  phone: z.string().min(1, { message: 'Telefone é obrigatório' }),
+  email: z
+    .string()
+    .email('Digite um e-mail válido')
+    .min(1, { message: 'E-mail é obrigatório' }),
+  xCoordinate: z.number().min(0, { message: 'X Coordenada é obrigatória' }),
+  yCoordinate: z.number().min(0, { message: 'Y Coordenada é obrigatória' }),
+});
+
+type CreateCustomerFormData = z.infer<typeof schema>;
 
 export const CreateCustomerModal: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { register, handleSubmit, setValue, reset } =
-    useForm<CreateCustomerFormData>();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+    getValues,
+  } = useForm<CreateCustomerFormData>({
+    resolver: zodResolver(schema),
+  });
 
   const fireToast = useToast();
 
@@ -77,11 +93,12 @@ export const CreateCustomerModal: React.FC = () => {
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalBody>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!!errors.name}>
                 <FormLabel>Nome</FormLabel>
                 <Input {...register('name')} />
+                <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
               </FormControl>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!!errors.phone}>
                 <FormLabel>Telefone</FormLabel>
                 <InputGroup>
                   <Input
@@ -91,18 +108,30 @@ export const CreateCustomerModal: React.FC = () => {
                     }}
                   />
                 </InputGroup>
+                <FormErrorMessage>{errors.phone?.message}</FormErrorMessage>
               </FormControl>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!!errors.email}>
                 <FormLabel>Email</FormLabel>
                 <Input type='email' {...register('email')} />
+                <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
               </FormControl>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!!errors.xCoordinate}>
                 <FormLabel>X Coordenada</FormLabel>
                 <Input type='number' {...register('xCoordinate')} />
+                <FormErrorMessage>
+                  {getValues()?.xCoordinate?.toString().length > 0
+                    ? errors.xCoordinate?.message
+                    : 'Digite um valor válido'}
+                </FormErrorMessage>
               </FormControl>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!!errors.yCoordinate}>
                 <FormLabel>Y Coordenada</FormLabel>
                 <Input type='number' {...register('yCoordinate')} />
+                <FormErrorMessage>
+                  {getValues()?.yCoordinate?.toString().length > 0
+                    ? errors.yCoordinate?.message
+                    : 'Digite um valor válido'}
+                </FormErrorMessage>
               </FormControl>
             </ModalBody>
             <ModalFooter>
